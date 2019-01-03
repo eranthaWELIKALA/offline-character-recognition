@@ -17,6 +17,7 @@ def sigmoid(Z):
     
     A = 1/(1+np.exp(-Z))
     cache = Z
+    print('sigmoid',A.shape)
     
     return A, cache
 
@@ -37,6 +38,7 @@ def relu(Z):
     assert(A.shape == Z.shape)
     
     cache = Z 
+    print('relu',A.shape)
     return A, cache
 
 

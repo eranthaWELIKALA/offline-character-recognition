@@ -8,6 +8,7 @@ import scipy
 from PIL import Image
 from scipy import ndimage
 from dnn_app_utils import *
+
 """
 %matplotlib inline
 plt.rcParams['figure.figsize'] = (5.0, 4.0) # set default size of plots
@@ -159,7 +160,8 @@ def L_model_forward(X, parameters):
 
     caches = []
     A = X
-    L = len(parameters) // 2                  # number of layers in the neural network
+    L = len(parameters) // 2
+    print("len",L)                  # number of layers in the neural network
     
     # Implement [LINEAR -> RELU]*(L-1). Add "cache" to the "caches" list.
     for l in range(1, L):
@@ -178,8 +180,10 @@ def L_model_forward(X, parameters):
                                           parameters['b' + str(L)], 
                                           activation='sigmoid')
     caches.append(cache)
-    
-   
+    print('AL shape',AL.shape)
+    AL = np.amax(AL, axis = 0)
+    AL = AL.T.reshape(1,36000)
+    print("AL shape", AL.shape)
     assert(AL.shape == (1, X.shape[1]))
             
     return AL, caches
@@ -197,12 +201,12 @@ def compute_cost(AL, Y):
     """
     
     m = Y.shape[1]
-
     # Compute loss from aL and y.
 
     cost = (-1 / m) * np.sum(np.multiply(Y, np.log(AL)) + np.multiply(1 - Y, np.log(1 - AL)))
     
     cost = np.squeeze(cost)      # To make sure your cost's shape is what we expect (e.g. this turns [[17]] into 17).
+    
     assert(cost.shape == ())
     
     return cost
@@ -224,7 +228,9 @@ def linear_backward(dZ, cache):
     m = A_prev.shape[1]
 
     dW = np.dot(dZ, cache[0].T) / m
-    db = np.squeeze(np.sum(dZ, axis=1, keepdims=True)) / m
+    db = np.squeeze(np.sum(dZ)) / m
+    #db = np.squeeze(np.sum(dZ, axis=1, keepdims=True)) / m
+    #print(np.dot(cache[1].T, dZ))
     dA_prev = np.dot(cache[1].T, dZ)
     
     assert (dA_prev.shape == A_prev.shape)
@@ -281,6 +287,7 @@ def L_model_backward(AL, Y, caches):
     """
     grads = {}
     L = len(caches) # the number of layers
+    #print('Y shape',Y.shape)
     m = AL.shape[1]
     Y = Y.reshape(AL.shape) # after this line, Y is the same shape as AL
     
@@ -291,9 +298,7 @@ def L_model_backward(AL, Y, caches):
     # Lth layer (SIGMOID -> LINEAR) gradients. Inputs: "AL, Y, caches". Outputs: "grads["dAL"], grads["dWL"], grads["dbL"]
 
     current_cache = caches[-1]
-    grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = linear_backward(sigmoid_backward(dAL, 
-                                                                                                        current_cache[1]), 
-                                                                                       current_cache[0])
+    grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = linear_backward(sigmoid_backward(dAL, current_cache[1]), current_cache[0])
     
     for l in reversed(range(L-1)):
         # lth layer: (RELU -> LINEAR) gradients.
@@ -451,7 +456,7 @@ def L_layer_model(X, Y, layers_dims, learning_rate=0.0075, num_iterations=3000, 
         
         # Compute cost.
         cost = compute_cost(AL, Y)
-    
+        print('cost',cost)
         # Backward propagation.
         grads = L_model_backward(AL, Y, caches)
  
