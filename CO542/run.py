@@ -41,5 +41,7 @@ layer_dims = [784, 60, 10] # creating Layer Dimension list
 learning_rate = 0.01 # assigning learning rate
 itr = 30 # Iterations
 
-parameters = L_layer_model(X_train.T, Y_train.T.reshape(1,36000), layer_dims, learning_rate, itr)
+#print('Y_train len =',len(Y_train))
+
+parameters = L_layer_model(X_train.T, preparing_labels_array(Y_train), layer_dims, learning_rate, itr)
 print(parameters)

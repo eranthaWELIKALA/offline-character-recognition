@@ -28,6 +28,26 @@ np.random.seed(1)
 
 #--------------------------------------------------------------------------------------------
 
+def preparing_labels_array(Y):
+    """
+    Argument:
+    Y -- labels array(shape - no_of examples ) - simple array
+
+    Returns:
+
+    """
+
+    no_of_examples = len(Y)
+    prepared_Y = np.zeros((no_of_examples,10)).reshape(no_of_examples,10)
+    example_no = 0
+    for i in Y:
+        prepared_Y[example_no,int(i)] = 1
+
+    return prepared_Y
+
+
+#--------------------------------------------------------------------------------------------
+
 def initialize_parameters(n_x, n_h, n_y):
     """
     Argument:
@@ -180,13 +200,13 @@ def L_model_forward(X, parameters):
                                           parameters['b' + str(L)], 
                                           activation='sigmoid')
     caches.append(cache)
-    print('AL shape',AL.shape)
-    AL = np.amax(AL, axis = 0)
-    AL = AL.T.reshape(1,36000)
-    print("AL shape", AL.shape)
-    assert(AL.shape == (1, X.shape[1]))
+    #print('AL shape',AL.shape)
+    #AL = np.amax(AL, axis = 0)
+    #AL = AL.T.reshape(1,36000)
+    #print("AL shape", AL.shape)
+    #assert(AL.shape == (1, X.shape[1]))
             
-    return AL, caches
+    return AL.T, caches
 #--------------------------------------------------------------------------------------------------------------------------------
 def compute_cost(AL, Y):
     """
@@ -226,7 +246,7 @@ def linear_backward(dZ, cache):
     """
     A_prev, W, b = cache
     m = A_prev.shape[1]
-
+    print('dot',dZ.shape,cache[0].T.shape)
     dW = np.dot(dZ, cache[0].T) / m
     db = np.squeeze(np.sum(dZ)) / m
     #db = np.squeeze(np.sum(dZ, axis=1, keepdims=True)) / m
@@ -294,18 +314,18 @@ def L_model_backward(AL, Y, caches):
     # Initializing the backpropagation
 
     dAL = dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
-    
     # Lth layer (SIGMOID -> LINEAR) gradients. Inputs: "AL, Y, caches". Outputs: "grads["dAL"], grads["dWL"], grads["dbL"]
 
     current_cache = caches[-1]
-    grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = linear_backward(sigmoid_backward(dAL, current_cache[1]), current_cache[0])
+    #print("c cache",current_cache[1])
+    grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = linear_backward(sigmoid_backward(dAL, current_cache[1].T), current_cache[0])
     
     for l in reversed(range(L-1)):
         # lth layer: (RELU -> LINEAR) gradients.
         # Inputs: "grads["dA" + str(l + 2)], caches". Outputs: "grads["dA" + str(l + 1)] , grads["dW" + str(l + 1)] , grads["db" + str(l + 1)] 
 
         current_cache = caches[l]
-        dA_prev_temp, dW_temp, db_temp = linear_backward(sigmoid_backward(dAL, current_cache[1]), current_cache[0])
+        dA_prev_temp, dW_temp, db_temp = linear_backward(sigmoid_backward(dAL, current_cache[1].T), current_cache[0])
         grads["dA" + str(l + 1)] = dA_prev_temp
         grads["dW" + str(l + 1)] = dW_temp
         grads["db" + str(l + 1)] = db_temp

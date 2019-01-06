@@ -77,7 +77,7 @@ def sigmoid_backward(dA, cache):
     """
     
     Z = cache
-    
+    #print('Z shape',Z.shape)
     s = 1/(1+np.exp(-Z))
     dZ = dA * s * (1-s)
     
