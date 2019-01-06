@@ -42,6 +42,7 @@ def preparing_labels_array(Y):
     example_no = 0
     for i in Y:
         prepared_Y[example_no,int(i)] = 1
+        example_no += 1
 
     return prepared_Y
 
